@@ -2,7 +2,7 @@
 
 A container in which Claude Code works unattended, without permission prompts, while your LAN and your server stay out of its reach. The container firewalls itself against the LAN, drops the capability to change those rules, and only then starts Claude as an unprivileged user.
 
-The easiest way to run it is [Unbox](https://github.com/kaedinger/unbox), a plugin that creates and manages several of these sandboxes and switches host access per sandbox. The image also works on its own, from the Docker tab.
+The easiest way to run it will be Unbox (coming soon), a plugin that creates and manages several of these sandboxes and switches host access per sandbox. The image also works on its own, from the Docker tab.
 
 <p align="center">
   <a href="https://unraid.net/"><img src="https://img.shields.io/badge/Unraid-tested%20with%207.3.2-white?logo=unraid&logoColor=white&labelColor=orange" alt="Tested with Unraid 7.3.2"></a>
@@ -69,9 +69,9 @@ docker run --rm --entrypoint cat "$(docker inspect -f '{{.Image}}' $C)" \
 
 ## Installation
 
-### With Unbox (recommended)
+### With Unbox (coming soon)
 
-Install [Unbox](https://github.com/kaedinger/unbox), choose a share, add a sandbox, click *Install Claude*.
+Install Unbox, choose a share, add a sandbox, click *Install Claude*.
 
 ### From the Docker tab
 
