@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>claude-sandbox</Name>
+  <Repository>ghcr.io/kaedinger/unbox-sandbox:latest</Repository>
+  <Network>bridge</Network>
+  <Privileged>false</Privileged>
+  <Shell>bash</Shell>
+  <Category>Tools: Productivity:</Category>
+  <Overview>Sandboxed Claude Code for unattended agentic development. The container firewalls itself against your LAN (internet only, plus explicit exceptions) and then drops the capability to change those rules. For more than one sandbox, give each its own Name, the same --hostname in Extra Parameters (also its Remote Control name) and its own folders.</Overview>
+  <ExtraParams>--cap-add=NET_ADMIN --hostname=claude-sandbox --memory=6g --cpus=4 --pids-limit=4096</ExtraParams>
+  <Config Name="Workspace" Target="/workspace" Default="/mnt/user/claude-sandbox/claude-sandbox/workspace" Mode="rw" Description="Projects Claude works on" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/claude-sandbox/claude-sandbox/workspace</Config>
+  <Config Name="Home" Target="/home/claude" Default="/mnt/user/claude-sandbox/claude-sandbox/home" Mode="rw" Description="Claude Code install, login and settings" Type="Path" Display="always" Required="true" Mask="false">/mnt/user/claude-sandbox/claude-sandbox/home</Config>
+  <Config Name="Backup" Target="/backup" Default="/mnt/user/claude-sandbox/claude-sandbox/backup" Mode="rw" Description="Daily archives of Claude's memory, transcripts and settings (no secrets), last 7 kept. Back this up instead of Home." Type="Path" Display="always" Required="false" Mask="false">/mnt/user/claude-sandbox/claude-sandbox/backup</Config>
+  <Config Name="LAN exceptions" Target="SANDBOX_ALLOW" Default="" Mode="" Description="Space-separated host:port (TCP) the sandbox may reach in your LAN, e.g. a Git server: 192.168.1.10:3000" Type="Variable" Display="always" Required="false" Mask="false"></Config>
+  <Config Name="Continue conversation" Target="SANDBOX_CONTINUE" Default="yes|no" Mode="" Description="yes: after a restart (container restart, image update, reboot) Claude continues the last conversation. no: it starts a new one each time. Switching host access always continues." Type="Variable" Display="always" Required="false" Mask="false">yes</Config>
+  <Config Name="Extra blocked ranges" Target="SANDBOX_BLOCK" Default="" Mode="" Description="Additional IPv4 CIDRs to block (private ranges are always blocked)" Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="PUID" Target="PUID" Default="99" Mode="" Description="" Type="Variable" Display="advanced" Required="true" Mask="false">99</Config>
+  <Config Name="PGID" Target="PGID" Default="100" Mode="" Description="" Type="Variable" Display="advanced" Required="true" Mask="false">100</Config>
+</Container>

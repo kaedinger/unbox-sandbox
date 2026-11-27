@@ -1,0 +1,36 @@
+#!/bin/bash
+# Daily archive of what in the home is worth keeping and can't be recreated
+# (Claude's memory and transcripts, settings, histories), into /backup, where a
+# share-level backup can read it. Secrets and caches stay out: only the listed
+# paths go in. Runs as the claude user, started by start.sh; keeps the last 7.
+# Without a /backup mount it does nothing.
+# host-access.sh spares this loop and its sleep; a tar it kills is simply retried
+# an hour later.
+DIR=/backup KEEP=7
+mountpoint -q "$DIR" || { echo "backup: $DIR not mounted, no backups"; exit 0; }
+umask 022
+cd "$HOME" || exit 1
+ITEMS=(.claude/projects .claude/history.jsonl .claude/CLAUDE.md .claude/settings.json
+  .claude/skills .claude/agents .claude/commands .claude.json .bash_history)
+
+backup() {
+  local out tmp have=() i rc
+  out="$DIR/claude-home-$(date +%F).tar.gz"
+  [ -e "$out" ] && return 0
+  for i in "${ITEMS[@]}"; do [ -e "$i" ] && have+=("$i"); done
+  [ ${#have[@]} -gt 0 ] || return 0
+  tmp="$DIR/.claude-home.tmp"
+  rm -f "$tmp"
+  tar -czf "$tmp" "${have[@]}" 2>/dev/null
+  rc=$?
+  # 1 = a file changed while being read (transcripts grow); still usable.
+  if [ "$rc" -gt 1 ]; then echo "backup: tar failed ($rc)"; rm -f "$tmp"; return 1; fi
+  mv "$tmp" "$out" && echo "backup: wrote $out"
+  find "$DIR" -maxdepth 1 -name 'claude-home-*.tar.gz' | sort -r | tail -n +$((KEEP + 1)) |
+    while read -r i; do rm -f "$i"; done
+}
+
+while :; do
+  backup
+  sleep 3600
+done

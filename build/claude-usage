@@ -1,0 +1,54 @@
+#!/bin/bash
+# Plan usage (5-hour / 7-day window) for Claude in this sandbox, one line:
+#   5h 42% (resets in 2h10m) · 7d 18% (resets in 4d6h) · ok
+# Verdict: "ok", "near limit" (5h >= USAGE_5H_MAX or 7d >= USAGE_7D_MAX) or
+# "unknown" (exit 1). Uses Claude Code's own OAuth token with Anthropic's internal,
+# undocumented usage endpoint, which can change. Readings are cached for 5 minutes,
+# failed fetches aren't retried for 5 minutes. Never prints the token.
+set -u
+CRED=${CLAUDE_CONFIG_DIR:-$HOME/.claude}/.credentials.json
+CACHE=${XDG_CACHE_HOME:-$HOME/.cache}/claude-usage.json
+FAIL=$CACHE.fail
+MAX5=${USAGE_5H_MAX:-85}
+MAX7=${USAGE_7D_MAX:-95}
+TTL=300
+
+age() { echo $(( $(date +%s) - $(stat -c %Y "$1" 2>/dev/null || echo 0) )); }
+
+fetch() {
+  local token body
+  token=$(jq -r '.claudeAiOauth.accessToken // empty' "$CRED" 2>/dev/null)
+  [ -n "$token" ] || return 1
+  body=$(curl -sf --max-time 15 \
+    -H "Authorization: Bearer $token" -H "anthropic-beta: oauth-2025-04-20" \
+    https://api.anthropic.com/api/oauth/usage) || return 1
+  jq -e '.five_hour or .seven_day' >/dev/null 2>&1 <<<"$body" || return 1
+  mkdir -p "${CACHE%/*}" && printf '%s\n' "$body" > "$CACHE"
+}
+
+if [ "$(age "$CACHE")" -ge $TTL ] && [ "$(age "$FAIL")" -ge $TTL ]; then
+  fetch || { mkdir -p "${CACHE%/*}"; touch "$FAIL"; }
+fi
+
+# Older than 30 minutes is too stale to act on.
+if [ "$(age "$CACHE")" -ge 1800 ]; then
+  echo "plan usage unknown (usage endpoint not reachable)"
+  exit 1
+fi
+
+jq -r --argjson now "$(date +%s)" --argjson m5 "$MAX5" --argjson m7 "$MAX7" '
+  def dur: if . >= 86400 then "\(./86400|floor)d\(.%86400/3600|floor)h"
+           else "\(./3600|floor)h\(.%3600/60|floor)m" end;
+  def win($name; $w):
+    if $w == null or $w.utilization == null then "\($name) ?"
+    else "\($name) \($w.utilization|floor)%" +
+      ( ($w.resets_at // "") | sub("\\.[0-9]+"; "") | sub("\\+00:00$"; "Z")
+        | (try (fromdateiso8601 - $now) catch null) as $s
+        | if $s != null and $s > 0 then " (resets in \($s|floor|dur))" else "" end )
+    end;
+  (.five_hour.utilization // null) as $u5 | (.seven_day.utilization // null) as $u7 |
+  (if $u5 == null and $u7 == null then "unknown"
+   elif ($u5 // 0) >= $m5 or ($u7 // 0) >= $m7 then "near limit"
+   else "ok" end) as $v |
+  "\(win("5h"; .five_hour)) · \(win("7d"; .seven_day)) · \($v)"
+' "$CACHE"
