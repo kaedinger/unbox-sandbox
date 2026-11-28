@@ -91,7 +91,7 @@ restart_claude() {
         for (i = 1; i <= n; i++)
           if (boot[i] && uid[i] && ppid[i] == tini && args[i] ~ /^tmux new-session /) tmux = pid[i]
         for (i = 1; i <= n; i++) {
-          if (boot[i] && tmux && ppid[i] == tmux && args[i] ~ /^bash -c cont=/) loop = pid[i]
+          if (boot[i] && tmux && ppid[i] == tmux && args[i] ~ /^bash -c keep=/) loop = pid[i]
           if (boot[i] && uid[i] && ppid[i] == tini && args[i] == "sleep infinity") sinf = pid[i]
         }
         for (i = 1; i <= n; i++)
