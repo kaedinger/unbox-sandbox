@@ -1,4 +1,4 @@
-# unbox-sandbox - Sandboxed Claude Code for Unraid
+# unbox-sandbox - A Sandboxed Claude Code
 
 A container in which Claude Code works unattended, without permission prompts, while the LAN and the Unraid server stay out of its reach. On every start, the container firewalls itself against the LAN, drops the capability to change those rules, and only then starts Claude as an unprivileged user.
 
@@ -13,6 +13,7 @@ The image runs on its own, from the Docker tab. Its companion is Unbox (coming s
   <a href="https://github.com/kaedinger/unbox-sandbox/releases"><img src="https://img.shields.io/github/release-date/kaedinger/unbox-sandbox?style=flat-square" alt="Release Date"></a>
   <br>
   <a href="https://unraid.net/"><img src="https://img.shields.io/badge/Unraid-tested%20with%207.3.2-white?logo=unraid&logoColor=white&labelColor=orange" alt="Tested with Unraid 7.3.2"></a>
+  <a href="https://forums.unraid.net/topic/201453-support-kaedinger-unbox-sandbox-claude-code-unattended/"><img src="https://img.shields.io/badge/Support-Unraid%20Forum-F15A2C?style=flat-square&color=orange" alt="Support Thread"></a>
   <a href="https://github.com/kaedinger/unbox-sandbox/issues"><img src="https://img.shields.io/github/issues/kaedinger/unbox-sandbox?style=flat-square" alt="Open Issues"></a>
 </p>
 
