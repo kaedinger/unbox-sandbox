@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
-# Draws unraid/icon.png (128x128, stdlib only): a ">_" prompt over a sand dune
-# on a dark rounded square. Run: python3 unraid/make-icon.py > unraid/icon.png
+# Draws the icon (stdlib only): a ">_" prompt over a sand dune on a dark rounded
+# square. Drawn on a 128-unit grid, rendered at any size (default 128):
+#   python3 unraid/make-icon.py > unraid/icon.png
+#   python3 unraid/make-icon.py 1024 > unraid/icon-1024.png
 import math, struct, sys, zlib
 
-N, S = 128, 4                      # output size, supersampling factor
+N = int(sys.argv[1]) if len(sys.argv) > 1 else 128   # output size
+S = 4 if N <= 256 else 2           # supersampling factor
 W = N * S
+F = W / 128                        # supersampled pixels per grid unit
 BG, SAND, FG = (38, 44, 56), (217, 119, 87), (245, 245, 245)  # SAND: terracotta
 P = 0.85                           # prompt scale
 AX, AY = 101, 27                   # asterisk centre
 
 
-def inside_rounded(x, y, r=26 * S):
+def inside_rounded(x, y, r=26 * F):
     cx = min(max(x, r), W - r)
     cy = min(max(y, r), W - r)
     return (x - cx) ** 2 + (y - cy) ** 2 <= r * r
@@ -25,7 +29,7 @@ def seg_dist(px, py, ax, ay, bx, by):
 def color(x, y):
     if not inside_rounded(x, y):
         return None
-    u, v = x / S, y / S
+    u, v = x / F, y / F
     # asterisk in the top right corner: six plain round-capped strokes
     for k in range(6):
         a = math.pi / 6 + k * math.pi / 3
