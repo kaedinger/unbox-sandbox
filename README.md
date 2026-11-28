@@ -75,7 +75,7 @@ Install Unbox, choose a share, add a sandbox, click *Install Claude*.
 
 ### From the Docker tab
 
-Install *unbox-sandbox* from Community Applications. For more than one sandbox, give each its own name, the same `--hostname` in *Extra Parameters* and its own folders. Then, once, in the container's console:
+Install *unbox-sandbox* from Community Applications (coming soon). For more than one sandbox, give each its own name, the same `--hostname` in *Extra Parameters* and its own folders. Then, once, in the container's console:
 
 ```bash
 su claude -c 'curl -fsSL https://claude.ai/install.sh | bash'
